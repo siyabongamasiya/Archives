@@ -5,21 +5,21 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import media.project.archives.Constants.errorOccured
 import media.project.archives.Constants.inProgress
 import media.project.archives.Constants.savedSuccessfully
-import media.project.archives.Data.LocalFilesRepoImpl.LocalFilesRepoImpl
 import media.project.archives.Data.Model.Image
 import media.project.archives.Data.Model.Video
-import media.project.archives.Data.RemoteFilesRepoImpl.RemoteFilesRepoImpl
+import media.project.archives.Data.RepositoryImpl.RepositoryImpl
 import media.project.archives.Domain.Model.Item
 import media.project.archives.Utils.EventBus
 import java.util.Collections
+import javax.inject.Inject
 
-class VideoViewerViewModel : ViewModel() {
-    val remoteFileRepo = RemoteFilesRepoImpl()
-    val localFilesRepoImpl = LocalFilesRepoImpl()
+@HiltViewModel
+class VideoViewerViewModel @Inject constructor(val repositoryImpl: RepositoryImpl) : ViewModel() {
 
     private var archivedVideos = mutableListOf<Video>()
 
@@ -42,10 +42,16 @@ class VideoViewerViewModel : ViewModel() {
 //    }
 
     suspend fun DownloadFile(item : Item,context: Context,uri: Uri){
-        viewModelScope.launch {
-            val flow = remoteFileRepo.DownloadFile(item,context,uri)
-            flow.collect{isSuccessful ->
+        try {
+            viewModelScope.launch {
+                val flow = repositoryImpl.DownloadFile(item, context, uri)
+                flow.collect { isSuccessful ->
 
+                }
+            }
+        }catch (e : Exception){
+            viewModelScope.launch{
+                EventBus.sendStatus(errorOccured)
             }
         }
     }

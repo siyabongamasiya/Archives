@@ -22,6 +22,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
@@ -34,7 +35,9 @@ import media.project.archives.Presentation.HomescreenImages.midSectionHomeScreen
 import media.project.archives.Presentation.ScreenRoutes
 
 @Composable
-fun DrawHomeScreenArchived(navHostController: NavHostController, homeScreenViewModel: HomeScreenViewModel){
+fun DrawHomeScreenArchived(navHostController: NavHostController){
+    val homeScreenViewModel = hiltViewModel<HomeScreenViewModel>()
+
     Scaffold {paddingValues ->
         midSectionHomeScreenArchived(navController = navHostController,
             paddingValues = paddingValues,

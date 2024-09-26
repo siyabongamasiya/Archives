@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
@@ -46,7 +47,9 @@ import media.project.archives.Presentation.ScreenRoutes
 import media.project.archives.ui.theme.ArchivesTheme
 
 @Composable
-fun DrawHomeScreenVideos(navHostController: NavHostController,homeScreenViewModel: HomeScreenViewModel){
+fun DrawHomeScreenVideos(navHostController: NavHostController){
+    val homeScreenViewModel = hiltViewModel<HomeScreenViewModel>()
+
     ArchivesTheme {
         Scaffold {paddingValues ->
             midSectionHomeScreenVideos(navController = navHostController,

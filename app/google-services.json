@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "411233406447",
+    "project_id": "archives-ae3bb",
+    "storage_bucket": "archives-ae3bb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:411233406447:android:b216b3c05b6435393cfa1a",
+        "android_client_info": {
+          "package_name": "media.project.archives"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_-0oq49RSEE1OP_A136RG_M3fsxefwbw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
