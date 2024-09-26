@@ -1,8 +1,6 @@
 package media.project.archives.Presentation
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,22 +26,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import media.project.archives.Constants.errorOccured
 import media.project.archives.Constants.inProgress
 import media.project.archives.Constants.isSent
 import media.project.archives.Constants.savedSuccessfully
-import media.project.archives.Presentation.AudioPlayerScreen.AudioPlayerViewModel
 import media.project.archives.Presentation.AudioPlayerScreen.DrawAudioPlayerScreen
 import media.project.archives.Presentation.Homescreen.DrawHomeScreen
-import media.project.archives.Presentation.Homescreen.HomeScreenViewModel
 import media.project.archives.Presentation.ImageViewerScreen.DrawImageViewerScreen
-import media.project.archives.Presentation.ImageViewerScreen.ImageViewerViewModel
 import media.project.archives.Presentation.VideoViewerScreen.DrawVideoViewerScreen
-import media.project.archives.Presentation.VideoViewerScreen.VideoViewerViewModel
 import media.project.archives.Utils.EventBus
 import media.project.archives.ui.theme.ArchivesTheme
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,12 +56,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DrawApp(){
     val navHostController = rememberNavController()
-    val HomeScreenViewModel = HomeScreenViewModel()
-    val imageViewerViewModel = ImageViewerViewModel()
-    val videoViewerViewModel = VideoViewerViewModel()
-    val audioPlayerViewModel = AudioPlayerViewModel()
-
-
 
     Scaffold(bottomBar = {
         var sendStatus by remember{
@@ -112,13 +102,12 @@ fun DrawApp(){
             ScreenRoutes.HomeScreen().route,
             modifier = Modifier.fillMaxSize()) {
             composable(ScreenRoutes.HomeScreen().route) {
-                DrawHomeScreen(navHostController, HomeScreenViewModel)
+                DrawHomeScreen(navHostController)
             }
             composable<ScreenRoutes.ImageViewer> {
                 val args = it.toRoute<ScreenRoutes.ImageViewer>()
                 DrawImageViewerScreen(
                     navHostController,
-                    imageViewerViewModel,
                     args.url,
                     args.title,
                     args.isArchived,
@@ -130,7 +119,6 @@ fun DrawApp(){
                 val args = it.toRoute<ScreenRoutes.VideoViewer>()
                 DrawVideoViewerScreen(
                     navHostController,
-                    videoViewerViewModel,
                     args.url,
                     args.title,
                     args.isArchived,
@@ -142,7 +130,6 @@ fun DrawApp(){
                 val args = it.toRoute<ScreenRoutes.AudioPlayer>()
                 DrawAudioPlayerScreen(
                     navHostController,
-                    audioPlayerViewModel,
                     args.title,
                     args.artist,
                     args.duration,

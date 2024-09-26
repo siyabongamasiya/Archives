@@ -1,46 +1,34 @@
 package media.project.archives.Presentation.Homescreen
 
 import android.content.Context
-import android.os.Environment
-import android.provider.MediaStore.Audio
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectIndexed
-import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.launch
 import media.project.archives.Constants.audioDownloadDone
 import media.project.archives.Constants.directory
 import media.project.archives.Constants.errorOccured
 import media.project.archives.Constants.imageDownloadDone
 import media.project.archives.Constants.videoDownloadDone
-import media.project.archives.Data.LocalFilesRepoImpl.LocalFilesRepoImpl
 import media.project.archives.Data.Model.Image
 import media.project.archives.Data.Model.Song
 import media.project.archives.Data.Model.Video
-import media.project.archives.Data.RemoteFilesRepoImpl.RemoteFilesRepoImpl
+import media.project.archives.Data.RepositoryImpl.RepositoryImpl
 import media.project.archives.Domain.Model.Item
 import media.project.archives.Utils.EventBus
+import media.project.archives.Utils.createDir
+import media.project.archives.Utils.createUniqueList
 import java.io.File
-import java.net.URLDecoder
-import java.util.Collections
+import javax.inject.Inject
 
-class HomeScreenViewModel : ViewModel() {
-    val localFilesRepoImpl = LocalFilesRepoImpl()
-    val remoteFilesRepoImpl = RemoteFilesRepoImpl()
+@HiltViewModel
+class HomeScreenViewModel @Inject constructor(val repositoryImpl: RepositoryImpl): ViewModel() {
 
     var _refreshedImages = MutableStateFlow(false)
     val refreshImages = _refreshedImages.asStateFlow()
@@ -107,73 +95,36 @@ class HomeScreenViewModel : ViewModel() {
 
     private fun isArchived(unArcheditem: Item) : Boolean{
         var isArchived = false
-        if (unArcheditem is Image){
-            archivedImages.forEach {archeditem ->
-                if (unArcheditem.url.equals(archeditem.url)){
-                    isArchived = true
+        try {
+            if (unArcheditem is Image) {
+                archivedImages.forEach { archeditem ->
+                    if (unArcheditem.url.equals(archeditem.url)) {
+                        isArchived = true
+                    }
+                }
+            } else if (unArcheditem is Video) {
+                archivedVideos.forEach { archeditem ->
+                    if (unArcheditem.url.equals(archeditem.url)) {
+                        isArchived = true
+                    }
+                }
+            } else {
+                archivedAudios.forEach { archeditem ->
+                    if (unArcheditem.url.equals(archeditem.url)) {
+                        isArchived = true
+                    }
                 }
             }
-        }else if (unArcheditem is Video){
-            archivedVideos.forEach {archeditem ->
-                if (unArcheditem.url.equals(archeditem.url)){
-                    isArchived = true
-                }
-            }
-        }else{
-            archivedAudios.forEach {archeditem ->
-                if (unArcheditem.url.equals(archeditem.url)){
-                    isArchived = true
-                }
+        }catch (e : Exception){
+            viewModelScope.launch{
+                EventBus.sendStatus(errorOccured)
             }
         }
 
         return isArchived
     }
 
-    fun createUniqueList(list: List<Item>) : List<Item>{
-        val uniquelist : List<Item> = emptyList()
 
-        val uniqueimages = createUniqueImageSet(list)
-        val uniquevideos = createUniqueVideoSet(list)
-        val uniqueaudios = createUniqueAudioSet(list)
-
-        return uniquelist.plus(uniqueimages).plus(uniquevideos).plus(uniqueaudios)
-    }
-    private fun createUniqueImageSet(list: List<Item>) : Set<Image>{
-        val set : MutableSet<Image> = mutableSetOf()
-
-        list.forEach { item ->
-            if (item is Image){
-                set.add(item)
-            }
-        }
-
-        return set
-    }
-
-    private fun createUniqueVideoSet(list: List<Item>) : Set<Video>{
-        val set : MutableSet<Video> = mutableSetOf()
-
-        list.forEach { item ->
-            if (item is Video){
-                set.add(item)
-            }
-        }
-
-        return set
-    }
-
-    private fun createUniqueAudioSet(list: List<Item>) : Set<Song>{
-        val set : MutableSet<Song> = mutableSetOf()
-
-        list.forEach { item ->
-            if (item is Song){
-                set.add(item)
-            }
-        }
-
-        return set
-    }
 
     private fun collectDownloadState(){
         val coroutine = CoroutineScope(Dispatchers.Default)
@@ -191,31 +142,13 @@ class HomeScreenViewModel : ViewModel() {
         }
     }
 
-    private fun createDir(){
-        try {
-            File(directory).mkdir()
-        }catch (exception : Exception){
-            val coroutineScope = CoroutineScope(Dispatchers.Default)
-            coroutineScope.launch {
-                EventBus.sendSavingStatus(errorOccured)
-            }
-
-        }
-
-    }
-
-
-
-
-
-
 
 
 
     suspend fun getImages(context: Context){
         viewModelScope.launch {
             try {
-                _images.value = localFilesRepoImpl.getImages(context)
+                _images.value = repositoryImpl.getImages(context)
                 getArchivedImages()
 
             }catch (exception : Exception){
@@ -227,7 +160,7 @@ class HomeScreenViewModel : ViewModel() {
     suspend fun getVideos(context: Context){
         viewModelScope.launch {
             try {
-                _videos.value = localFilesRepoImpl.getVideos(context)
+                _videos.value = repositoryImpl.getVideos(context)
                 _refreshedVideos.value = true
                 //getArchivedVideos()
             }catch (exception : Exception){
@@ -239,7 +172,7 @@ class HomeScreenViewModel : ViewModel() {
     suspend fun getAudios(context: Context){
         viewModelScope.launch {
             try {
-                _audios.value =  localFilesRepoImpl.getAudio(context)
+                _audios.value =  repositoryImpl.getAudio(context)
                 _refreshedAudios.value = true
                 //getArchivedAudios()
             }catch (exception : Exception){
@@ -250,11 +183,12 @@ class HomeScreenViewModel : ViewModel() {
 
     private suspend fun getArchivedImages() {
         archivedImages.clear()
-        val flow = remoteFilesRepoImpl.getArchivedImages()
+        val flow = repositoryImpl.getArchivedImages()
         viewModelScope.launch {
             flow.collect { image ->
                 if (isLocal(image)) image.setIsLoc(true) else image.setIsLoc(false)
                 archivedImages.add(image)
+                //combine images
                 combinedArchivedlist = combinedArchivedlist.plus(archivedImages).toMutableList()
                 _mixedItem.value = createUniqueList(combinedArchivedlist)
             }

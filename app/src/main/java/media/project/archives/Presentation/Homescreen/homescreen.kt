@@ -8,28 +8,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import media.project.archives.Presentation.HomescreenArchived.DrawHomeScreenArchived
 import media.project.archives.Presentation.HomescreenAudio.DrawHomeScreenAudios
@@ -38,8 +30,8 @@ import media.project.archives.Presentation.HomescreenVideos.DrawHomeScreenVideos
 import media.project.archives.ui.theme.ArchivesTheme
 
 @Composable
-fun DrawHomeScreen(navHostController: NavHostController,homeScreenViewModel: HomeScreenViewModel){
-
+fun DrawHomeScreen(navHostController: NavHostController){
+    val homeScreenViewModel = hiltViewModel<HomeScreenViewModel>()
 
     ArchivesTheme {
         Scaffold {paddingvalues ->
@@ -109,19 +101,19 @@ fun midSectionHomescreen(navHostController: NavHostController,
                 .padding(10.dp)) {index ->
             when(index){
                 0 -> {
-                    DrawHomeScreenImages(navHostController,homeScreenViewModel)
+                    DrawHomeScreenImages(navHostController)
                 }
 
                 1 -> {
-                    DrawHomeScreenVideos(navHostController,homeScreenViewModel)
+                    DrawHomeScreenVideos(navHostController)
                 }
 
                 2 -> {
-                    DrawHomeScreenAudios(navHostController,homeScreenViewModel)
+                    DrawHomeScreenAudios(navHostController)
                 }
 
                 3 -> {
-                    DrawHomeScreenArchived(navHostController = navHostController, homeScreenViewModel = homeScreenViewModel)
+                    DrawHomeScreenArchived(navHostController = navHostController)
                 }
             }
         }

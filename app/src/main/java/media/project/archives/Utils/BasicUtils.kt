@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import media.project.archives.Constants.AudiosReferencePath
 import media.project.archives.Constants.ImagesReferencePath
 import media.project.archives.Constants.VideosReferencePath
+import media.project.archives.Constants.directory
 import media.project.archives.Constants.errorOccured
 import media.project.archives.Constants.imageDownloadDone
 import media.project.archives.Constants.inProgress
@@ -103,7 +104,7 @@ fun FirebaseStorage.SaveImage(image: Image,
     //report to ui that we are sending file
     val coroutine = CoroutineScope(Dispatchers.Default)
     coroutine.launch {
-        EventBus.sendSavingStatus(inProgress)
+        EventBus.sendStatus(inProgress)
     }
     //create storage reference
     val storageRef = this.reference
@@ -166,7 +167,7 @@ fun FirebaseStorage.getArchivedImage(producerScope: ProducerScope<Image>){
                             val coroutineScope = CoroutineScope(Dispatchers.Default)
 
                             coroutineScope.launch {
-                                EventBus.sendSavingStatus(imageDownloadDone)
+                                EventBus.sendStatus(imageDownloadDone)
                             }
                         }
                     }
@@ -219,7 +220,7 @@ fun FirebaseStorage.DownLoadFile(item: Item, context: Context,
 
     }catch (exception : Exception){
         coroutine.launch {
-            EventBus.sendSavingStatus(errorOccured)
+            EventBus.sendStatus(errorOccured)
         }
     }
 }
@@ -326,6 +327,65 @@ fun ContentResolver.getListOfAudios() : List<Song>{
     }
 
     return listofaudios
+}
+
+fun createUniqueList(list: List<Item>) : List<Item>{
+    val uniquelist : List<Item> = emptyList()
+
+    val uniqueimages = createUniqueImageSet(list)
+    val uniquevideos = createUniqueVideoSet(list)
+    val uniqueaudios = createUniqueAudioSet(list)
+
+    return uniquelist.plus(uniqueimages).plus(uniquevideos).plus(uniqueaudios)
+}
+private fun createUniqueImageSet(list: List<Item>) : Set<Image>{
+    val set : MutableSet<Image> = mutableSetOf()
+
+    list.forEach { item ->
+        if (item is Image){
+            set.add(item)
+        }
+    }
+
+    return set
+}
+fun createUniqueVideoSet(list: List<Item>) : Set<Video>{
+    val set : MutableSet<Video> = mutableSetOf()
+
+    list.forEach { item ->
+        if (item is Video){
+            set.add(item)
+        }
+    }
+
+    return set
+}
+
+
+
+fun createUniqueAudioSet(list: List<Item>) : Set<Song>{
+    val set : MutableSet<Song> = mutableSetOf()
+
+    list.forEach { item ->
+        if (item is Song){
+            set.add(item)
+        }
+    }
+
+    return set
+}
+
+fun createDir(){
+    try {
+        File(directory).mkdir()
+    }catch (exception : Exception){
+        val coroutineScope = CoroutineScope(Dispatchers.Default)
+        coroutineScope.launch {
+            EventBus.sendStatus(errorOccured)
+        }
+
+    }
+
 }
 
 

@@ -44,6 +44,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -70,7 +71,9 @@ import kotlin.system.exitProcess
 
 
 @Composable
-fun DrawHomeScreenImages(navHostController: NavHostController,homeScreenViewModel: HomeScreenViewModel){
+fun DrawHomeScreenImages(navHostController: NavHostController){
+    val homeScreenViewModel = hiltViewModel<HomeScreenViewModel>()
+
     ArchivesTheme {
         requestPermission {
             Scaffold {paddingValues ->

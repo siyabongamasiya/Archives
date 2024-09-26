@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -53,7 +54,6 @@ import media.project.archives.ui.theme.ArchivesTheme
 @Composable
 fun DrawAudioPlayerScreen(
     navHostController: NavHostController,
-    audioPlayerViewModel: AudioPlayerViewModel,
     title: String,
     artist: String,
     duration: String,
@@ -63,6 +63,8 @@ fun DrawAudioPlayerScreen(
     downloadUri: String,
     islocal: Boolean
 ){
+    val audioPlayerViewModel = hiltViewModel<AudioPlayerViewModel>()
+
     ArchivesTheme {
         val song = Song(artist = artist,duration = duration, id = id)
         song.setTit(title)
@@ -72,7 +74,7 @@ fun DrawAudioPlayerScreen(
         Scaffold(topBar = {
             topSection(navController = navHostController)
         }) {paddingvalues ->
-            midSectionAudioPlayer(navHostController = navHostController,
+            midSectionAudioPlayer(
                 paddingValues = paddingvalues,
                 song = song,
                 audioPlayerViewModel = audioPlayerViewModel)
@@ -82,13 +84,12 @@ fun DrawAudioPlayerScreen(
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun midSectionAudioPlayer(navHostController: NavHostController,
+fun midSectionAudioPlayer(
                           paddingValues: PaddingValues,
                           song : Song,
                           audioPlayerViewModel: AudioPlayerViewModel){
 
     val context = LocalContext.current
-    val coroutine = rememberCoroutineScope()
     val audioPlayer by remember{
         mutableStateOf(AudioPlayer(context,song))
     }

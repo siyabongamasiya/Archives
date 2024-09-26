@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -45,7 +46,9 @@ import media.project.archives.ui.theme.ArchivesTheme
 
 
 @Composable
-fun DrawHomeScreenAudios(navHostController: NavHostController,homeScreenViewModel: HomeScreenViewModel){
+fun DrawHomeScreenAudios(navHostController: NavHostController){
+    val homeScreenViewModel = hiltViewModel<HomeScreenViewModel>()
+
     ArchivesTheme {
         Scaffold {paddingValues ->
             midSectionHomeScreenAudios(navController = navHostController,

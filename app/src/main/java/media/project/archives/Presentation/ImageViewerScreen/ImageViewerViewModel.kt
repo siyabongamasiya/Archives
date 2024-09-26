@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.channelFlow
@@ -12,25 +13,29 @@ import kotlinx.coroutines.launch
 import media.project.archives.Constants.errorOccured
 import media.project.archives.Constants.inProgress
 import media.project.archives.Constants.savedSuccessfully
-import media.project.archives.Data.LocalFilesRepoImpl.LocalFilesRepoImpl
 import media.project.archives.Data.Model.Image
 import media.project.archives.Data.Model.Song
 import media.project.archives.Data.Model.Video
-import media.project.archives.Data.RemoteFilesRepoImpl.RemoteFilesRepoImpl
+import media.project.archives.Data.RepositoryImpl.RepositoryImpl
 import media.project.archives.Domain.Model.Item
 import media.project.archives.Utils.EventBus
+import javax.inject.Inject
 
-class ImageViewerViewModel : ViewModel() {
-
-    val localFilesRepoImpl = LocalFilesRepoImpl()
-    val remoteFileRepo = RemoteFilesRepoImpl()
+@HiltViewModel
+class ImageViewerViewModel @Inject constructor(val repositoryImpl: RepositoryImpl) : ViewModel() {
 
     private var archivedImages = mutableListOf<Image>()
 
 
     fun initialize(context : Context){
-        viewModelScope.launch {
-            getArchivedImages(context)
+        try {
+            viewModelScope.launch {
+                getArchivedImages(context)
+            }
+        }catch (e : Exception){
+            viewModelScope.launch{
+                EventBus.sendStatus(errorOccured)
+            }
         }
     }
 
@@ -43,15 +48,27 @@ class ImageViewerViewModel : ViewModel() {
     }
 
     suspend fun saveImageArchives(image: Image){
-        archivedImages.add(image)
-        remoteFileRepo.saveImage(image)
+        try {
+            archivedImages.add(image)
+            repositoryImpl.saveImage(image)
+        }catch (e : Exception){
+            viewModelScope.launch{
+                EventBus.sendStatus(errorOccured)
+            }
+        }
     }
 
     suspend fun DownloadFile(item : Item,context: Context,uri: Uri){
-        viewModelScope.launch {
-            val flow = remoteFileRepo.DownloadFile(item,context,uri)
-            flow.collect{isSuccessful ->
+        try {
+            viewModelScope.launch {
+                val flow = repositoryImpl.DownloadFile(item, context, uri)
+                flow.collect { isSuccessful ->
 
+                }
+            }
+        }catch (e : Exception){
+            viewModelScope.launch{
+                EventBus.sendStatus(errorOccured)
             }
         }
     }

@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -31,19 +32,21 @@ import media.project.archives.Data.Model.Image
 import media.project.archives.Presentation.Components.DrawImageButton
 import media.project.archives.Presentation.Components.customButton
 import media.project.archives.Presentation.Components.topSection
+import media.project.archives.Presentation.Homescreen.HomeScreenViewModel
 import media.project.archives.ui.theme.ArchivesTheme
 
 
 @Composable
 fun DrawImageViewerScreen(
     navController: NavHostController,
-    imageViewerViewModel: ImageViewerViewModel,
     url: String,
     title: String,
     archived: Boolean,
     downloadUri: String,
     islocal: Boolean
 ){
+    val imageViewerViewModel = hiltViewModel<ImageViewerViewModel>()
+
     ArchivesTheme {
         Scaffold(topBar = {
             topSection(navController = navController)
